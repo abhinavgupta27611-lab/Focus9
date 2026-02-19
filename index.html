@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Focus9 Ultimate</title>
+<style>
+body{font-family:Arial;background:#eef2f7;text-align:center}
+.card{background:white;width:400px;margin:15px auto;padding:15px;border-radius:10px;box-shadow:0 0 10px gray}
+button{padding:7px;margin:5px;background:#3498db;color:white;border:none;border-radius:5px;cursor:pointer}
+select,input{padding:6px;margin:5px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<h1>📚 Focus9 – Class 9 Ultimate</h1>
+
+<!-- LOGIN -->
+<div class="card" id="loginBox">
+<h3>Login</h3>
+<input type="text" id="username" placeholder="Enter Name">
+<button onclick="login()">Login</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+
+<h3 id="welcome"></h3>
+
+<div class="card">
+<h3>Select Subject & Chapter</h3>
+
+<select id="subject" onchange="loadChapters()">
+<option value="">Select Subject</option>
+<option value="math">Maths</option>
+<option value="science">Science</option>
+<option value="sst">SST</option>
+<option value="english">English</option>
+</select>
+
+<select id="chapter"></select>
+
+<br>
+<button onclick="showNotes()">View Notes</button>
+<button onclick="startQuiz()">Start MCQ Quiz</button>
+
+<div id="content"></div>
+</div>
+
+<div class="card hidden" id="quizBox">
+<h3>MCQ Quiz</h3>
+<p id="question"></p>
+<div id="options"></div>
+<button onclick="nextQuestion()">Next</button>
+<p id="score"></p>
+</div>
+
+</div>
+
+<script>
+
+// ===== LOGIN SYSTEM =====
+function login(){
+let name=document.getElementById("username").value;
+if(name!=""){
+localStorage.setItem("focusUser",name);
+startApp(name);
+}
+}
+
+function startApp(name){
+document.getElementById("loginBox").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+document.getElementById("welcome").innerText="Welcome "+name;
+}
+
+window.onload=function(){
+let savedUser=localStorage.getItem("focusUser");
+if(savedUser){startApp(savedUser);}
+}
+
+// ===== FULL SYLLABUS STRUCTURE =====
+const syllabus={
+math:["Number Systems","Polynomials","Linear Equations","Triangles","Statistics"],
+science:["Matter in Our Surroundings","Is Matter Around Us Pure","Atoms and Molecules","Cell Structure","Tissues"],
+sst:["French Revolution","Socialism in Europe","Nazism","Drainage","Climate"],
+english:["The Fun They Had","Sound of Music","Wind Poem","Little Girl","Rain on the Roof"]
+};
+
+// ===== SAMPLE NOTES =====
+const notesData={
+"Linear Equations":"Form: ax+b=0. Solve by isolating x.",
+"Cell Structure":"Cell is basic unit of life.",
+"French Revolution":"Started in 1789 in France."
+};
+
+// ===== SAMPLE QUIZ =====
+const quizData={
+"Linear Equations":[
+{q:"Solve 2x+4=0",o:["x=2","x=-2"],a:"x=-2"},
+{q:"Solve 3x=6",o:["x=2","x=3"],a:"x=2"}
+],
+"Cell Structure":[
+{q:"Basic unit of life?",o:["Atom","Cell"],a:"Cell"}
+],
+"French Revolution":[
+{q:"Year of Revolution?",o:["1789","1776"],a:"1789"}
+]
+};
+
+function loadChapters(){
+let sub=document.getElementById("subject").value;
+let chap=document.getElementById("chapter");
+chap.innerHTML="";
+if(syllabus[sub]){
+syllabus[sub].forEach(c=>{
+chap.innerHTML+=`<option value="${c}">${c}</option>`;
+});
+}
+}
+
+// ===== NOTES =====
+function showNotes(){
+let chap=document.getElementById("chapter").value;
+let content=document.getElementById("content");
+content.innerHTML=notesData[chap]||"Full chapter notes coming soon...";
+}
+
+// ===== QUIZ =====
+let current=0;
+let score=0;
+let activeQuiz=[];
+
+function startQuiz(){
+let chap=document.getElementById("chapter").value;
+if(quizData[chap]){
+activeQuiz=quizData[chap];
+current=0;
+score=0;
+document.getElementById("quizBox").classList.remove("hidden");
+showQuestion();
+}
+else{
+alert("Quiz not available for this chapter yet.");
+}
+}
+
+function showQuestion(){
+let q=activeQuiz[current];
+document.getElementById("question").innerText=q.q;
+let options="";
+q.o.forEach(opt=>{
+options+=`<button onclick="checkAnswer('${opt}')">${opt}</button><br>`;
+});
+document.getElementById("options").innerHTML=options;
+}
+
+function checkAnswer(selected){
+if(selected===activeQuiz[current].a){score++;}
+}
+
+function nextQuestion(){
+current++;
+if(current<activeQuiz.length){
+showQuestion();
+}
+else{
+document.getElementById("question").innerText="Quiz Finished!";
+document.getElementById("options").innerHTML="";
+document.getElementById("score").innerText="Score: "+score;
+localStorage.setItem("lastScore",score);
+}
+}
+
+</script>
+</body>
+</html>
